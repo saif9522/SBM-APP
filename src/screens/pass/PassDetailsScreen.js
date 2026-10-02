@@ -20,7 +20,7 @@ export default function PassDetailsScreen({ route, navigation }) {
   const qrValue = p?.pass_id || `PASS-${p?.id}`;
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Pass" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         {/* Digital pass card */}

@@ -46,7 +46,7 @@ export default function DonationFormScreen({ navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Make a Donation" onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen, Header, Button, Card } from '../../components';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { currency, mediaUrl } from '../../utils/format';
@@ -25,9 +26,10 @@ function InfoRow({ icon, label, value }) {
 export default function ServiceDetailsScreen({ route, navigation }) {
   const { service, categoryIcon } = route.params || {};
   const img = mediaUrl(service?.image);
+  const insets = useSafeAreaInsets();
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Service details" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.hero}>
@@ -63,7 +65,7 @@ export default function ServiceDetailsScreen({ route, navigation }) {
         <View style={{ height: 90 }} />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button
           title="Apply for this service"
           onPress={() => navigation.navigate('ServiceApplication', { service })}

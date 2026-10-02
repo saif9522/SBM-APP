@@ -6,7 +6,7 @@ import { colors, spacing, typography, radius } from '../../constants/theme';
 
 export default function ComplaintHomeScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Complaints" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.hero}>

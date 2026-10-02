@@ -20,7 +20,7 @@ export default function BloodDonorsScreen({ navigation }) {
   const groupOptions = [{ label: 'All', value: null }, ...CHOICES.bloodGroups.map((g) => ({ label: g, value: g }))];
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Blood Donors" onBack={() => navigation.goBack()} />
       <View style={styles.filter}>
         <ChipGroup label="Filter by blood group" options={groupOptions} value={group} onChange={setGroup} />

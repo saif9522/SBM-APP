@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from './Card';
-import { colors, spacing, typography, radius } from '../constants/theme';
+import { colors, spacing, typography, radius, shadow } from '../constants/theme';
 import { currency, mediaUrl } from '../utils/format';
 
 const UNIT_LABEL = {
@@ -11,45 +10,85 @@ const UNIT_LABEL = {
   per_kg: 'per kg', per_km: 'per km', per_booking: 'per booking', per_person: 'per person',
 };
 
-export default function ServiceCard({ service, categoryIcon, onPress }) {
+export default function ServiceCard({ service, categoryIcon, categoryName, onPress }) {
   const img = mediaUrl(service?.image);
+  const unit = UNIT_LABEL[service?.unit] || '';
+
   return (
-    <Card onPress={onPress} padded={false} style={styles.card}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+    >
       <View style={styles.thumb}>
         {img ? (
           <Image source={{ uri: img }} style={styles.img} resizeMode="cover" />
+        ) : categoryIcon ? (
+          <Text style={styles.emoji}>{categoryIcon}</Text>
         ) : (
-          <Text style={styles.emoji}>{categoryIcon || '📋'}</Text>
+          <Ionicons name="construct-outline" size={26} color={colors.primary} />
         )}
       </View>
+
       <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={1}>{service?.name}</Text>
+        {categoryName ? (
+          <View style={styles.tag}>
+            <Text style={styles.tagText} numberOfLines={1}>{categoryName}</Text>
+          </View>
+        ) : null}
+        <Text style={styles.name} numberOfLines={2}>{service?.name}</Text>
         {service?.description ? (
           <Text style={styles.desc} numberOfLines={2}>{service.description}</Text>
         ) : null}
-        <View style={styles.row}>
-          <Text style={styles.price}>{currency(service?.price)}</Text>
-          <Text style={styles.unit}>{UNIT_LABEL[service?.unit] || ''}</Text>
-          <View style={{ flex: 1 }} />
-          <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
+        <View style={styles.metaRow}>
+          <View style={styles.pricePill}>
+            <Text style={styles.price}>{currency(service?.price)}</Text>
+          </View>
+          {unit ? <Text style={styles.unit}>{unit}</Text> : null}
         </View>
       </View>
-    </Card>
+
+      <View style={styles.chevron}>
+        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { flexDirection: 'row', overflow: 'hidden', marginBottom: spacing.md },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadow.card,
+  },
+  pressed: { opacity: 0.9, transform: [{ scale: 0.995 }] },
   thumb: {
-    width: 84, backgroundColor: colors.primarySoft,
+    width: 64, height: 64, borderRadius: radius.md,
+    backgroundColor: colors.primarySoft, overflow: 'hidden',
     alignItems: 'center', justifyContent: 'center',
   },
   img: { width: '100%', height: '100%' },
   emoji: { fontSize: 30 },
-  body: { flex: 1, padding: spacing.md },
+  body: { flex: 1, marginLeft: spacing.md },
+  tag: {
+    alignSelf: 'flex-start', backgroundColor: colors.primaryLight,
+    borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 2, marginBottom: 4,
+  },
+  tagText: { fontSize: typography.tiny, color: colors.primaryDark, fontWeight: typography.semibold },
   name: { fontSize: typography.body, fontWeight: typography.semibold, color: colors.text },
   desc: { fontSize: typography.small, color: colors.textMuted, marginTop: 2, lineHeight: 18 },
-  row: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
-  price: { fontSize: typography.body, fontWeight: typography.bold, color: colors.primary },
-  unit: { fontSize: typography.tiny, color: colors.textFaint, marginLeft: spacing.xs },
+  metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
+  pricePill: {
+    backgroundColor: `${colors.primary}14`, borderRadius: radius.pill,
+    paddingHorizontal: spacing.md, paddingVertical: 3,
+  },
+  price: { fontSize: typography.small, fontWeight: typography.bold, color: colors.primaryDark },
+  unit: { fontSize: typography.tiny, color: colors.textFaint, marginLeft: spacing.sm },
+  chevron: {
+    width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center', marginLeft: spacing.sm,
+  },
 });

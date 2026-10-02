@@ -28,7 +28,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
-    <Screen edges={['top', 'bottom']}>
+    <Screen edges={['bottom']}>
       <Header title="Settings" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <SectionLabel text="Preferences" />
@@ -54,7 +54,7 @@ export default function SettingsScreen({ navigation }) {
         <SectionLabel text="About & Support" />
         <Card padded={false}>
           <Nav icon="information-circle-outline" label="About app" onPress={() => navigation.navigate('About')} border />
-          <Nav icon="shield-checkmark-outline" label="Privacy policy" onPress={() => openUrl(WEB_PAGES.privacy)} border />
+          <Nav icon="shield-checkmark-outline" label="Privacy policy" onPress={() => navigation.navigate('PrivacyPolicy')} border />
           <Nav icon="mail-outline" label="Contact us" onPress={() => navigation.navigate('ContactUs')} />
         </Card>
 

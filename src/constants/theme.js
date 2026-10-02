@@ -21,7 +21,7 @@ export const colors = {
   accentLight: '#FFF1E6',
 
   // Neutrals
-  bg: '#F5F6F5',             // app background (light gray)
+  bg: '#EFF6ED',             // app background (soft green tint, theme jaisa)
   surface: '#FFFFFF',        // cards
   surfaceAlt: '#FAFAFA',
 

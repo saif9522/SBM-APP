@@ -6,7 +6,7 @@ import { colors, spacing, typography, radius } from '../../constants/theme';
 
 export default function DonationHomeScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Donate" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.hero}>

@@ -1,8 +1,13 @@
 import { createResource } from './resource';
 import { API } from '../constants/endpoints';
+import listMine from './mine';
 
 export const complaints = createResource(API.complaints);
-export function myComplaints(userId, params = {}) {
-  return complaints.list({ user: userId, ordering: '-created_at', ...params });
+/** Sirf logged-in user ki complaints. */
+export function myComplaints(user, params = {}) {
+  return listMine(complaints, user, {
+    params: { ordering: '-created_at', ...params },
+    userParam: 'user',
+  });
 }
 export default { complaints, myComplaints };

@@ -53,7 +53,7 @@ export default function CreateBloodRequestScreen({ navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Request Blood" onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">

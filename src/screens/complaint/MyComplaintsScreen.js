@@ -11,10 +11,10 @@ const LABEL = { light: 'Light', water: 'Water', garbage: 'Garbage', drainage: 'D
 
 export default function MyComplaintsScreen({ navigation }) {
   const { user } = useAuth();
-  const { data, loading, error, refetch } = useApi(() => complaintApi.myComplaints(user?.id), [user?.id]);
+  const { data, loading, error, refetch } = useApi(() => complaintApi.myComplaints(user), [user?.id, user?.phone]);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="My Complaints" onBack={navigation?.canGoBack?.() ? () => navigation.goBack() : undefined} />
       {loading && !data ? <Loader message="Loading…" /> : error ? <ErrorView message={error} onRetry={refetch} /> : (
         <FlatList

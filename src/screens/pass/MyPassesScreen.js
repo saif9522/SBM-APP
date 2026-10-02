@@ -12,10 +12,10 @@ const TYPE_LABEL = { bus: 'Bus Pass', auto: 'Auto Pass' };
 
 export default function MyPassesScreen({ navigation }) {
   const { user } = useAuth();
-  const { data, loading, error, refetch } = useApi(() => passApi.myPasses(user?.phone, { ordering: '-created_at' }), [user?.phone]);
+  const { data, loading, error, refetch } = useApi(() => passApi.myPasses(user, { ordering: '-created_at' }), [user?.id, user?.phone]);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="My Passes" onBack={() => navigation.goBack()} />
       {loading && !data ? <Loader message="Loading…" /> : error ? <ErrorView message={error} onRetry={refetch} /> : (
         <FlatList

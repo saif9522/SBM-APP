@@ -19,7 +19,9 @@ export default function RegisterScreen({ navigation }) {
     const { errors: e, isValid } = v.validate({
       name: () => v.required(f.name, 'Full name'),
       phone: () => v.phone(f.phone),
-      email: () => v.email(f.email),
+      email: () => v.email(f.email, { requiredField: true }),
+      address: () => v.required(f.address, 'Address'),
+      ward_no: () => v.required(f.ward_no, 'Ward no.'),
       password: () => v.password(f.password),
       confirm: () => v.confirmPassword(f.confirm, f.password),
     });
@@ -50,9 +52,9 @@ export default function RegisterScreen({ navigation }) {
 
       <Input label="Full name" value={f.name} onChangeText={set('name')} placeholder="Your name" leftIcon="person-outline" error={errors.name} />
       <Input label="Mobile number" value={f.phone} onChangeText={set('phone')} placeholder="10-digit mobile number" keyboardType="phone-pad" leftIcon="call-outline" maxLength={10} error={errors.phone} />
-      <Input label="Email (optional)" value={f.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" leftIcon="mail-outline" error={errors.email} />
-      <Input label="Address (optional)" value={f.address} onChangeText={set('address')} placeholder="Your address" leftIcon="home-outline" multiline />
-      <Input label="Ward no. (optional)" value={f.ward_no} onChangeText={set('ward_no')} placeholder="e.g. 12" leftIcon="location-outline" />
+      <Input label="Email" value={f.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" leftIcon="mail-outline" error={errors.email} />
+      <Input label="Address" value={f.address} onChangeText={set('address')} placeholder="Your address" leftIcon="home-outline" multiline error={errors.address} />
+      <Input label="Ward no." value={f.ward_no} onChangeText={set('ward_no')} placeholder="e.g. 12" leftIcon="location-outline" keyboardType="number-pad" error={errors.ward_no} />
       <Input label="Password" value={f.password} onChangeText={set('password')} placeholder="At least 6 characters" secureTextEntry leftIcon="lock-closed-outline" error={errors.password} />
       <Input label="Confirm password" value={f.confirm} onChangeText={set('confirm')} placeholder="Re-enter password" secureTextEntry leftIcon="lock-closed-outline" error={errors.confirm} />
 

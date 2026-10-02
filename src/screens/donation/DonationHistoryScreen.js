@@ -9,10 +9,10 @@ import { currency, formatDate } from '../../utils/format';
 
 export default function DonationHistoryScreen({ navigation }) {
   const { user } = useAuth();
-  const { data, loading, error, refetch } = useApi(() => donationApi.myDonations(user?.phone), [user?.phone]);
+  const { data, loading, error, refetch } = useApi(() => donationApi.myDonations(user), [user?.id, user?.phone]);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Donation History" onBack={() => navigation.goBack()} />
       {loading && !data ? <Loader message="Loading…" /> : error ? <ErrorView message={error} onRetry={refetch} /> : (
         <FlatList

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, Pressable, ActivityIndicator, StyleSheet, View } from 'react-native';
 import { colors, radius, spacing, typography } from '../constants/theme';
+import useSectionTheme from '../hooks/useSectionTheme';
 
 /**
  * variant: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
@@ -17,7 +18,8 @@ export default function Button({
   fullWidth = true,
 }) {
   const isDisabled = disabled || loading;
-  const v = VARIANTS[variant] || VARIANTS.primary;
+  const theme = useSectionTheme();
+  const v = themedVariant(variant, theme);
 
   return (
     <Pressable
@@ -70,6 +72,23 @@ const VARIANTS = {
     label: { color: '#fff' },
   },
 };
+
+// Section ke rang me button: Blood screen par laal, Pass par neela …
+// 'danger' hamesha laal rehta hai — wo ek matlab hai, sajawat nahi.
+function themedVariant(variant, theme) {
+  const base = VARIANTS[variant] || VARIANTS.primary;
+  if (!theme || variant === 'danger') return base;
+  switch (variant) {
+    case 'secondary':
+      return { container: { backgroundColor: theme.chip }, label: { color: theme.grad[2] } };
+    case 'outline':
+      return { container: { ...base.container, borderColor: theme.tint }, label: { color: theme.tint } };
+    case 'ghost':
+      return { container: base.container, label: { color: theme.tint } };
+    default:
+      return { container: { backgroundColor: theme.tint }, label: base.label };
+  }
+}
 
 const styles = StyleSheet.create({
   base: {

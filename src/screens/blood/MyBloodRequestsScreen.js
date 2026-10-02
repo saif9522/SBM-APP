@@ -9,10 +9,10 @@ import { formatDate } from '../../utils/format';
 
 export default function MyBloodRequestsScreen({ navigation }) {
   const { user } = useAuth();
-  const { data, loading, error, refetch } = useApi(() => bloodApi.myBloodRequests(user?.id, { ordering: '-created_at' }), [user?.id]);
+  const { data, loading, error, refetch } = useApi(() => bloodApi.myBloodRequests(user, { ordering: '-created_at' }), [user?.id, user?.phone]);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="My Blood Requests" onBack={() => navigation.goBack()} />
       {loading && !data ? <Loader message="Loading…" /> : error ? <ErrorView message={error} onRetry={refetch} /> : (
         <FlatList

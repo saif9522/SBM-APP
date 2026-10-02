@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { Screen, Header, Input, Button, ChipGroup, FilePicker } from '../../components';
+import { Screen, Header, Input, Button, ChipGroup, FilePicker, PaymentModal } from '../../components';
+import { fees as fetchFees, feeText, feeRequired } from '../../api/paymentApi';
 import { colors, spacing, typography } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import careerApi, { EXPERIENCE } from '../../api/careerApi';
@@ -26,6 +27,44 @@ export default function ApplyJobScreen({ route, navigation }) {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const set = (k) => (val) => setF((s) => ({ ...s, [k]: val }));
+
+  // Joining fee — amount comes from the server (settings.CAREER_JOINING_FEE),
+  // never hardcoded in the app.
+  const [fee, setFee] = useState(null);
+  const [createdApp, setCreatedApp] = useState(null);
+  const [payOpen, setPayOpen] = useState(false);
+  useEffect(() => {
+    // null = amount unknown (old backend) → fee still collected, amount shown by Razorpay.
+    fetchFees().then((d) => setFee(d?.career ?? null)).catch(() => setFee(null));
+  }, []);
+  const feeLabel = feeText(fee);
+  const needsFee = feeRequired(fee);
+
+  const onPayClosed = async (paidByServer) => {
+    setPayOpen(false);
+    // Re-read the application itself — works on the old backend too, where
+    // the status endpoint doesn't exist yet.
+    let paid = !!paidByServer;
+    if (!paid && createdApp?.id) {
+      try {
+        const fresh = await careerApi.applications.get(createdApp.id);
+        paid = fresh?.payment_status === 'paid';
+      } catch { /* keep false */ }
+    }
+    if (paid) {
+      Alert.alert('Payment received ✅',
+        `Application submitted and joining fee${feeLabel ? ` ${feeLabel}` : ''} received. The team will contact you after screening.`,
+        [{ text: 'View my applications', onPress: () => navigation.replace('MyJobApplications') }]);
+      return;
+    }
+    Alert.alert('Application saved — fee pending',
+      `Your application is saved. Pay the joining fee${feeLabel ? ` ${feeLabel}` : ''} to complete it. `
+      + 'If money was already debited, it will update automatically in a few minutes.',
+      [
+        { text: 'Pay now', onPress: () => setPayOpen(true) },
+        { text: 'Pay later', style: 'cancel', onPress: () => navigation.replace('MyJobApplications') },
+      ]);
+  };
 
   const submit = async () => {
     const { errors: e, isValid } = v.validate({
@@ -57,9 +96,15 @@ export default function ApplyJobScreen({ route, navigation }) {
         pin_code: f.pin_code.trim(), district: f.district.trim(), state: f.state.trim(),
         address: f.address.trim(), about: f.about.trim(),
       };
-      const created = await careerApi.applications.create(
+      // Retry after a failed payment must NOT create a second application.
+      const created = createdApp || await careerApi.applications.create(
         buildFormData(fields, { resume, aadhaar }), MULTIPART
       );
+      setCreatedApp(created);
+      if (needsFee && created?.payment_status !== 'paid') {
+        setPayOpen(true); // step 2: joining fee
+        return;
+      }
       Alert.alert('Application submitted', 'Thank you! The team will review your application.', [
         { text: 'View my applications', onPress: () => navigation.replace('MyJobApplications') },
         { text: 'Done', onPress: () => navigation.popToTop() },
@@ -72,7 +117,7 @@ export default function ApplyJobScreen({ route, navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Apply" subtitle={position?.label} onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
@@ -102,10 +147,33 @@ export default function ApplyJobScreen({ route, navigation }) {
           <FilePicker label="Resume / CV" value={resume} onPick={setResume} error={errors.resume} />
           <FilePicker label="Aadhaar" value={aadhaar} onPick={setAadhaar} error={errors.aadhaar} />
 
-          <Button title="Submit application" onPress={submit} loading={busy} style={{ marginTop: spacing.md }} />
+          {needsFee ? (
+            <View style={styles.feeBox}>
+              <Text style={styles.feeTitle}>Joining fee{feeLabel ? `: ${feeLabel}` : ' applies'}</Text>
+              <Text style={styles.feeSub}>
+                One-time, paid securely via Razorpay (UPI / card / net banking) right after you submit.
+              </Text>
+            </View>
+          ) : null}
+
+          <Button
+            title={createdApp
+              ? `Pay joining fee${feeLabel ? ` ${feeLabel}` : ''}`
+              : (needsFee ? `Submit & pay${feeLabel ? ` ${feeLabel}` : ''}` : 'Submit application')}
+            onPress={createdApp ? () => setPayOpen(true) : submit}
+            loading={busy}
+            style={{ marginTop: spacing.md }}
+          />
           <View style={{ height: spacing.xxl }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <PaymentModal
+        visible={payOpen}
+        kind="career"
+        refId={createdApp?.id}
+        onClose={onPayClosed}
+      />
     </Screen>
   );
 }
@@ -113,4 +181,7 @@ export default function ApplyJobScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   body: { padding: spacing.lg },
   section: { fontSize: typography.body, fontWeight: typography.bold, color: colors.text, marginTop: spacing.md, marginBottom: spacing.md },
+  feeBox: { backgroundColor: '#EEF0FF', borderRadius: 12, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: '#C7CBFA' },
+  feeTitle: { fontSize: typography.body, fontWeight: typography.bold, color: '#312E81' },
+  feeSub: { fontSize: typography.small, color: colors.textMuted, marginTop: 2 },
 });

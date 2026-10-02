@@ -77,22 +77,31 @@ export const detail = (resource, id) => `${resource}${id}/`;
 // These are the REAL JSON endpoints confirmed from the live backend URLconf.
 // They are called through the shared `api` axios instance (baseURL = /api/).
 export const AUTH_ROUTES = {
-  register: 'auth/register/',                    // {name, phone, password, ...} -> sends OTP
-  registerVerify: 'auth/register/verify/',       // {phone, otp} -> {token, user}
+  register: 'auth/register/',                    // {name, phone, email, address, ward_no, password} -> sends OTP
+  registerVerify: 'auth/register/verify-otp/',   // {phone, otp} -> {token, user}
   registerResend: 'auth/register/resend-otp/',   // {phone}
-  login: 'auth/login/',                          // {phone, password} -> {token, user}
-  loginVerify: 'auth/login/verify-otp/',         // {phone, otp} -> {token, user}
+  login: 'auth/login/',                          // {phone, password} -> {token, user}  (citizen)
+  agentLogin: 'auth/agent/login/',               // {identifier, password} -> {token, user}   (agent)
+  employeeLogin: 'auth/employee/login/',         // {identifier, password} -> {token, user} (employee)
   forgotSendOtp: 'auth/forgot-password/send-otp/', // {phone}
   forgotReset: 'auth/forgot-password/reset/',      // {phone, otp, new_password}
   logout: 'auth/logout/',
-  me: 'auth/me/',                                // Bearer -> user
-  profile: 'auth/profile/',                      // Bearer -> user (GET/PATCH)
+  me: 'auth/me/',                                // Bearer -> user (role-aware)
   changePassword: 'auth/change-password/',       // {old_password, new_password}
 };
 
 // Known backend choice values (kept in sync with core/models.py) so the UI
 // never hardcodes strings that must match the API.
 export const CHOICES = {
+  // Account types shown on the Register screen. "user" = normal citizen,
+  // "agent" = field/partner agent, "employee" = staff. The value is sent to
+  // the backend as `role`/`user_type` so the account is created correctly.
+  userRoles: [
+    { label: 'User', value: 'user', icon: 'person-outline', color: '#0047AB', hint: 'Citizen using civic services' },
+    { label: 'Agent', value: 'agent', icon: 'briefcase-outline', color: '#138808', hint: 'Field / partner agent' },
+    { label: 'Employee', value: 'employee', icon: 'id-card-outline', color: '#7C3AED', hint: 'Foundation staff member' },
+  ],
+
   complaintStatus: ['pending', 'processing', 'resolved'],
   serviceRequestStatus: ['pending', 'assigned', 'in_progress', 'completed', 'cancelled'],
   donationStatus: ['pending', 'verified', 'failed'],

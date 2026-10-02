@@ -19,7 +19,7 @@ export default function AmbulanceHomeScreen({ navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Ambulance" onBack={() => navigation.goBack()} />
 
       <Pressable style={styles.sos} onPress={callEmergency}>

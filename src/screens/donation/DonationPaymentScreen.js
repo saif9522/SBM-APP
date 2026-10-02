@@ -1,55 +1,58 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Screen, Header, Card, Button, Loader } from '../../components';
+import { Screen, Header, Card, Button, Loader, PaymentModal } from '../../components';
 import { colors, spacing, typography } from '../../constants/theme';
 import { paymentUrl } from '../../constants/config';
 import donationApi from '../../api/donationApi';
+import { paymentStatus } from '../../api/paymentApi';
 import { currency } from '../../utils/format';
 import { friendlyError } from '../../utils/apiHelpers';
 
 /**
- * Opens the real Razorpay checkout page hosted by the Django backend
- * (/pay/donation/<id>/) via Linking. After the user returns, we refetch the
- * donation to reflect the backend-verified status. No payment is faked.
+ * Razorpay checkout ab app ke andar (WebView) khulta hai — backend ki hosted
+ * /pay/donation/<id>/ page. Payment ke baad status API se verify hota hai.
  */
 export default function DonationPaymentScreen({ route, navigation }) {
   const { donation } = route.params || {};
   const [status, setStatus] = useState(donation?.status || 'pending');
   const [checking, setChecking] = useState(false);
-  const [opened, setOpened] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
 
-  const openGateway = useCallback(async () => {
-    const url = paymentUrl('donation', donation.id);
-    const ok = await Linking.canOpenURL(url).catch(() => false);
-    if (!ok) { Alert.alert('Cannot open payment', 'Please try again later.'); return; }
-    setOpened(true);
-    Linking.openURL(url);
-  }, [donation]);
+  const openGateway = useCallback(() => setPayOpen(true), []);
 
-  const refreshStatus = useCallback(async () => {
+  const refreshStatus = useCallback(async (silent = false) => {
     setChecking(true);
     try {
+      // Server checks with Razorpay and records a payment it missed.
+      try { await paymentStatus('donation', donation.id); } catch { /* fall through to read */ }
       const fresh = await donationApi.donations.get(donation.id);
       setStatus(fresh.status);
       if (fresh.status === 'verified') {
         Alert.alert('Thank you!', 'Your donation has been received.');
       } else if (fresh.status === 'failed') {
         Alert.alert('Payment failed', 'The payment did not go through. You can try again.');
-      } else {
+      } else if (!silent) {
         Alert.alert('Still pending', 'We have not received confirmation yet. If you paid, it may take a moment.');
       }
     } catch (err) {
-      Alert.alert('Could not check status', friendlyError(err));
+      if (!silent) Alert.alert('Could not check status', friendlyError(err));
     } finally {
       setChecking(false);
     }
   }, [donation]);
 
+  // Sheet closed for ANY reason (done, ✕, back, returned from GPay) →
+  // always re-read the real status from the server.
+  const onPayClosed = useCallback(() => {
+    setPayOpen(false);
+    refreshStatus(true);
+  }, [refreshStatus]);
+
   const verified = status === 'verified';
 
   return (
-    <Screen edges={['top', 'bottom']}>
+    <Screen edges={['bottom']}>
       <Header title="Payment" onBack={() => navigation.goBack()} />
       <View style={styles.body}>
         <View style={[styles.circle, verified && { backgroundColor: colors.success }]}>
@@ -59,7 +62,7 @@ export default function DonationPaymentScreen({ route, navigation }) {
         <Text style={styles.sub}>
           {verified
             ? 'Payment verified. Thank you for your support!'
-            : 'Complete your payment securely on the next screen. Return here afterwards to confirm.'}
+            : 'Pay securely with Razorpay — the checkout opens right here in the app.'}
         </Text>
 
         <Card style={styles.card}>
@@ -75,11 +78,19 @@ export default function DonationPaymentScreen({ route, navigation }) {
           <Button title="Done" onPress={() => navigation.popToTop()} />
         ) : (
           <>
-            <Button title={opened ? 'Reopen payment page' : 'Pay with Razorpay'} onPress={openGateway} />
-            <Button title="I've paid — check status" variant="outline" onPress={refreshStatus} style={{ marginTop: spacing.sm }} />
+            <Button title="Pay with Razorpay" onPress={openGateway} icon={<Ionicons name="card-outline" size={18} color="#fff" />} />
+            <Button title="I've paid — check status" variant="outline" onPress={() => refreshStatus(false)} style={{ marginTop: spacing.sm }} />
           </>
         )}
       </View>
+
+      <PaymentModal
+        visible={payOpen}
+        kind="donation"
+        refId={donation?.id}
+        url={paymentUrl('donation', donation?.id)}
+        onClose={onPayClosed}
+      />
     </Screen>
   );
 }

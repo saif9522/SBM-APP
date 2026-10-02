@@ -7,7 +7,7 @@ import { LOGO } from '../../constants/assets';
 
 export default function AboutScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="About" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
@@ -23,7 +23,7 @@ export default function AboutScreen({ navigation }) {
         </Card>
 
         <Button title="Visit website" variant="outline" onPress={() => Linking.openURL(SITE_BASE_URL)} />
-        <Button title="Privacy policy" variant="ghost" onPress={() => Linking.openURL(WEB_PAGES.privacy)} style={{ marginTop: spacing.sm }} />
+        <Button title="Privacy policy" variant="ghost" onPress={() => navigation.navigate('PrivacyPolicy')} style={{ marginTop: spacing.sm }} />
       </ScrollView>
     </Screen>
   );

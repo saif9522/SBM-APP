@@ -10,13 +10,13 @@ import CategoryServiceList from '../booking/CategoryServiceList';
 export default function AutoHomeScreen({ navigation }) {
   const query = useApi(() => serviceApi.servicesByCategoryCode('auto'), []);
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header
         title="Auto & Rickshaw"
         onBack={() => navigation.goBack()}
         right={
           <Pressable onPress={() => navigation.navigate('Bookings')} hitSlop={10}>
-            <Ionicons name="briefcase-outline" size={22} color={colors.text} />
+            <Ionicons name="briefcase-outline" size={22} color="#fff" />
           </Pressable>
         }
       />

@@ -10,8 +10,8 @@ import { currency, formatDate } from '../../utils/format';
 export default function MyApplicationsScreen({ navigation }) {
   const { user } = useAuth();
   const { data, loading, error, refetch } = useApi(
-    () => serviceApi.myRequests(user?.id, { ordering: '-created_at' }),
-    [user?.id]
+    () => serviceApi.myRequests(user, { ordering: '-created_at' }),
+    [user?.id, user?.phone]
   );
 
   if (loading && !data) return <Wrap nav={navigation}><Loader message="Loading applications…" /></Wrap>;
@@ -57,7 +57,7 @@ export default function MyApplicationsScreen({ navigation }) {
 
 function Wrap({ children, nav }) {
   return (
-    <Screen edges={['top', 'bottom']}>
+    <Screen edges={['bottom']}>
       <Header title="My Applications" onBack={nav?.canGoBack?.() ? () => nav.goBack() : undefined} />
       {children}
     </Screen>

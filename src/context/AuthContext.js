@@ -59,35 +59,25 @@ export function AuthProvider({ children }) {
     setUser(u || null);
   }, []);
 
-  // phone + password -> immediate session
-  const loginWithPassword = useCallback(async ({ phone, password }) => {
-    const res = await authApi.login({ phone, password });
+  // phone/code + password -> immediate session
+  const loginWithPassword = useCallback(async ({ phone, password, role, code }) => {
+    const res = await authApi.login({ phone, password, role, code });
     await persistSession(res);
     return res;
   }, [persistSession]);
-
-  // phone -> OTP sent (no session yet)
-  const requestLoginOtp = useCallback((phone) => authApi.requestLoginOtp({ phone }), []);
 
   // registration -> OTP sent (no session yet)
   const register = useCallback((payload) => authApi.register(payload), []);
 
-  // phone + otp -> session. Registration and OTP-login use DIFFERENT backend
-  // endpoints, so branch on the flow the screen was opened with.
-  const verifyOtp = useCallback(async ({ phone, otp, flow }) => {
-    const res = flow === 'register'
-      ? await authApi.verifyRegisterOtp({ phone, otp })
-      : await authApi.verifyLoginOtp({ phone, otp });
+  // phone + otp -> session (registration verification; login has no OTP).
+  const verifyOtp = useCallback(async ({ phone, otp }) => {
+    const res = await authApi.verifyRegisterOtp({ phone, otp });
     await persistSession(res);
     return res;
   }, [persistSession]);
 
-  // Resend the code for whichever flow we're in.
-  const resendOtp = useCallback(({ phone, flow }) => (
-    flow === 'register'
-      ? authApi.resendRegisterOtp({ phone })
-      : authApi.requestLoginOtp({ phone })
-  ), []);
+  // Resend the registration OTP.
+  const resendOtp = useCallback(({ phone }) => authApi.resendRegisterOtp({ phone }), []);
 
   const logout = useCallback(async () => {
     await authStorage.clearAuth();
@@ -101,20 +91,32 @@ export function AuthProvider({ children }) {
     await authStorage.setStoredUser(next);
   }, [user]);
 
+  // Re-fetch the latest profile from the server (e.g. after paying a fee).
+  const refreshUser = useCallback(async () => {
+    try {
+      const fresh = await authApi.me();
+      setUser(fresh);
+      await authStorage.setStoredUser(fresh);
+      return fresh;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const value = useMemo(() => ({
     user,
     token,
     isAuthenticated: !!token,
     bootstrapping,
     loginWithPassword,
-    requestLoginOtp,
     register,
     verifyOtp,
     resendOtp,
     logout,
     updateUser,
+    refreshUser,
     persistSession,
-  }), [user, token, bootstrapping, loginWithPassword, requestLoginOtp, register, verifyOtp, resendOtp, logout, updateUser, persistSession]);
+  }), [user, token, bootstrapping, loginWithPassword, register, verifyOtp, resendOtp, logout, updateUser, refreshUser, persistSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

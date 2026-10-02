@@ -6,7 +6,7 @@ import { colors, spacing, typography, radius } from '../../constants/theme';
 
 export default function PassHomeScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Digital Pass" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.hero}>

@@ -6,6 +6,7 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 import AboutScreen from '../screens/settings/AboutScreen';
 import ContactUsScreen from '../screens/settings/ContactUsScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
+import PrivacyPolicyScreen from '../screens/settings/PrivacyPolicyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export default function ProfileStack() {
       <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="ContactUs" component={ContactUsScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
     </Stack.Navigator>
   );
 }

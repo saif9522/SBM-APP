@@ -5,6 +5,7 @@ import { Screen, Header, Card, Button } from '../../components';
 import { colors, spacing, typography } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import { initials } from '../../utils/format';
+import { openInTab } from '../../navigation/navHelpers';
 
 export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuth();
@@ -12,14 +13,14 @@ export default function ProfileScreen({ navigation }) {
   const name = user?.name || 'Guest';
 
   const MENU = [
-    { key: 'apps', label: 'My Applications', icon: 'document-text-outline', onPress: () => navigation.navigate('Services', { screen: 'MyApplications' }) },
+    { key: 'apps', label: 'My Applications', icon: 'document-text-outline', onPress: () => openInTab(navigation, 'Services', 'MyApplications') },
     { key: 'bookings', label: 'My Bookings', icon: 'briefcase-outline', onPress: () => navigation.navigate('Bookings') },
-    { key: 'complaints', label: 'My Complaints', icon: 'megaphone-outline', onPress: () => navigation.navigate('Services', { screen: 'MyComplaints' }) },
-    { key: 'donations', label: 'My Donations', icon: 'heart-outline', onPress: () => navigation.navigate('Services', { screen: 'DonationHistory' }) },
-    { key: 'pass', label: 'My Pass', icon: 'card-outline', onPress: () => navigation.navigate('Services', { screen: 'MyPasses' }) },
+    { key: 'complaints', label: 'My Complaints', icon: 'megaphone-outline', onPress: () => openInTab(navigation, 'Services', 'MyComplaints') },
+    { key: 'donations', label: 'My Donations', icon: 'heart-outline', onPress: () => openInTab(navigation, 'Services', 'DonationHistory') },
+    { key: 'pass', label: 'My Pass', icon: 'card-outline', onPress: () => openInTab(navigation, 'Services', 'MyPasses') },
     { key: 'notifications', label: 'Notifications', icon: 'notifications-outline', onPress: () => navigation.navigate('Notifications') },
-    { key: 'gallery', label: 'Gallery', icon: 'images-outline', onPress: () => navigation.navigate('Services', { screen: 'Gallery' }) },
-    { key: 'careers', label: 'Careers', icon: 'briefcase-outline', onPress: () => navigation.navigate('Services', { screen: 'CareerHome' }) },
+    { key: 'gallery', label: 'Gallery', icon: 'images-outline', onPress: () => openInTab(navigation, 'Services', 'Gallery') },
+    { key: 'careers', label: 'Careers', icon: 'briefcase-outline', onPress: () => openInTab(navigation, 'Services', 'CareerHome') },
     { key: 'settings', label: 'Settings', icon: 'settings-outline', onPress: () => navigation.navigate('Settings') },
     { key: 'about', label: 'About', icon: 'information-circle-outline', onPress: () => navigation.navigate('About') },
   ];
@@ -27,12 +28,12 @@ export default function ProfileScreen({ navigation }) {
   const onLogout = async () => { setBusy(true); await logout(); };
 
   return (
-    <Screen edges={['top', 'bottom']}>
+    <Screen edges={['bottom']}>
       <Header
         title="Profile"
         right={
           <Pressable onPress={() => navigation.navigate('EditProfile')} hitSlop={10}>
-            <Ionicons name="create-outline" size={22} color={colors.text} />
+            <Ionicons name="create-outline" size={22} color="#fff" />
           </Pressable>
         }
       />

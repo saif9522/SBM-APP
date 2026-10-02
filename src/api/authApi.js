@@ -20,8 +20,6 @@ import { AUTH_ROUTES } from '../constants/endpoints';
 // Normalise whatever comes back into a single { token, user } shape so the
 // rest of the app never has to care.
 function normalizeAuth(data) {
-  console.log('>>> BACKEND RESPONSE BODY <<<', JSON.stringify(data));
-
   let user = data?.user || data?.profile || data?.data?.user || data?.data || null;
 
   if (!user && data && (data.id || data.phone || data.name)) {
@@ -42,7 +40,6 @@ function normalizeAuth(data) {
     (user?.id ? `session_${user.id}` : null) ||
     (typeof data === 'string' ? data : null);
 
-  console.log('>>> TOKEN EXTRACTED RESULT <<<', { tokenFound: !!token, tokenValue: token });
   return { token, user, raw: data };
 }
 
@@ -63,18 +60,24 @@ export async function resendRegisterOtp({ phone }) {
 }
 
 // ── Login ─────────────────────────────────────────────────────
-export async function login({ phone, password }) {
-  const { data } = await api.post(AUTH_ROUTES.login, { phone, password });
-  return normalizeAuth(data);
-}
-
-export async function requestLoginOtp({ phone }) {
-  const { data } = await api.post(AUTH_ROUTES.login, { phone });
-  return data;
-}
-
-export async function verifyLoginOtp({ phone, otp }) {
-  const { data } = await api.post(AUTH_ROUTES.loginVerify, { phone, otp });
+// Citizen -> phone + password  (auth/login/)
+// Agent    -> agent code / phone + password  (auth/agent/login/)
+// Employee -> employee id / phone + password (auth/employee/login/)
+export async function login({ phone, password, role, code }) {
+  const id = (code || phone || '').trim();
+  if (role === 'agent') {
+    const { data } = await api.post(AUTH_ROUTES.agentLogin, {
+      identifier: id, agent_code: id, code: id, phone: id, password,
+    });
+    return normalizeAuth(data);
+  }
+  if (role === 'employee') {
+    const { data } = await api.post(AUTH_ROUTES.employeeLogin, {
+      identifier: id, employee_id: id, code: id, phone: id, password,
+    });
+    return normalizeAuth(data);
+  }
+  const { data } = await api.post(AUTH_ROUTES.login, { phone: id, password });
   return normalizeAuth(data);
 }
 
@@ -112,8 +115,6 @@ export default {
   verifyRegisterOtp,
   resendRegisterOtp,
   login,
-  requestLoginOtp,
-  verifyLoginOtp,
   me,
   changePassword,
   forgotPasswordSendOtp,

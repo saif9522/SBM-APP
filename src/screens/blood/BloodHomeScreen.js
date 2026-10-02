@@ -13,7 +13,7 @@ const ACTIONS = [
 
 export default function BloodHomeScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Blood Donation" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.hero}>

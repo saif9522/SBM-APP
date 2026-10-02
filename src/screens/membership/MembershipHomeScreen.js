@@ -14,7 +14,7 @@ import CategoryServiceList from '../booking/CategoryServiceList';
 export default function MembershipHomeScreen({ navigation }) {
   const query = useApi(() => serviceApi.servicesByCategoryCode('membership'), []);
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Membership" onBack={() => navigation.goBack()} />
       <View style={styles.banner}>
         <Ionicons name="people" size={22} color={colors.primary} />

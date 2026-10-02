@@ -20,7 +20,9 @@ export default function AuthLayout({ title, subtitle, children }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.brand}>
-            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+            <View style={styles.logoCircle}>
+              <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+            </View>
           </View>
           <Text style={styles.title}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -35,7 +37,11 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: spacing.xl, paddingTop: spacing.xxl, flexGrow: 1 },
   brand: { alignItems: 'center', marginBottom: spacing.xl },
-  logo: { width: 92, height: 92 },
+  logoCircle: {
+    width: 108, height: 108, borderRadius: 30, backgroundColor: colors.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  logo: { width: 78, height: 78 },
   title: { fontSize: typography.h1, fontWeight: typography.bold, color: colors.text, textAlign: 'center' },
   subtitle: { fontSize: typography.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, lineHeight: 21 },
   form: { marginTop: spacing.xl },

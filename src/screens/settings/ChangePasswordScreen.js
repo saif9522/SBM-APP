@@ -33,7 +33,7 @@ export default function ChangePasswordScreen({ navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Change Password" onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">

@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1A1440"
+      "backgroundColor": "#FFFFFF"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,7 +23,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We use your location to set pickup/drop points and to tag complaints accurately.",
         "NSCameraUsageDescription": "We use the camera to capture photos for complaints and document uploads.",
-        "NSPhotoLibraryUsageDescription": "We access your photos so you can attach images to applications and complaints."
+        "NSPhotoLibraryUsageDescription": "We access your photos so you can attach images to applications and complaints.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -39,8 +40,6 @@
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.RECORD_AUDIO"
       ]
     },
@@ -62,7 +61,9 @@
           "cameraPermission": "Allow SBM Foundation to use your camera."
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-sharing",
+      "expo-font"
     ],
     "extra": {
       "eas": {

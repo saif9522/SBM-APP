@@ -1,39 +1,42 @@
-import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useAuth } from '../context/AuthContext';
-import useOnboarding from '../hooks/useOnboarding';
 
 import SplashScreen from '../screens/splash/SplashScreen';
-import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 import AuthNavigator from './AuthNavigator';
 import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
 
+// Logo (splash) screen ko kam se kam itni der dikhana hai (10 second),
+// taaki wo flash hoke gayab na ho. Bootstrap agar isse jaldi ho jaaye tab
+// bhi logo pura 10 sec dikhega.
+const MIN_SPLASH_MS = 10000;
+
 export default function RootNavigator() {
   const { bootstrapping, isAuthenticated } = useAuth();
-  const { done } = useOnboarding();
+  const [splashDone, setSplashDone] = useState(false);
 
-  console.log('--- ROOT NAVIGATOR STATE ---', { bootstrapping, done, isAuthenticated });
+  // Minimum splash timer — bootstrap se independent.
+  useEffect(() => {
+    const t = setTimeout(() => setSplashDone(true), MIN_SPLASH_MS);
+    return () => clearTimeout(t);
+  }, []);
 
-  // Agar bootstrapping chal rahi hai ya done resolve nahi hua hai
-  if (bootstrapping || done === null) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
-        {SplashScreen ? <SplashScreen /> : <ActivityIndicator size="large" color="#007AFF" />}
-      </View>
-    );
+  // Pehla screen: LOGO wala splash. Jab tak auth bootstrap ya minimum
+  // splash time complete nahi hota, splash hi dikhega. Onboarding
+  // ("Help Your Community") ab flow me nahi hai.
+  if (bootstrapping || !splashDone) {
+    return <SplashScreen />;
   }
 
+  // Splash ke baad: agar logged-in hai to app, warna FORM (Login/Register).
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!done ? (
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        ) : isAuthenticated ? (
+        {isAuthenticated ? (
           <Stack.Screen name="Main" component={MainTabs} />
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

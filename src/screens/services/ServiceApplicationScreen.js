@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Image, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Screen, Header, Input, Button, Card } from '../../components';
+import { Screen, Header, Input, Button, Card, PaymentModal } from '../../components';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
 import serviceApi from '../../api/serviceApi';
+import { paymentUrl } from '../../constants/config';
 import { buildFormData, MULTIPART } from '../../utils/upload';
 import { currency } from '../../utils/format';
 import * as v from '../../validation/validators';
@@ -20,6 +21,8 @@ export default function ServiceApplicationScreen({ route, navigation }) {
   const [image, setImage] = useState(null);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [createdReq, setCreatedReq] = useState(null);
 
   const qty = Math.max(1, parseInt(quantity, 10) || 1);
   const total = Number(service?.price || 0) * qty;
@@ -44,14 +47,29 @@ export default function ServiceApplicationScreen({ route, navigation }) {
 
     setBusy(true);
     try {
-      const fields = { user: user.id, service: service.id, quantity: qty, address: address.trim(), notes: notes.trim() };
+      // App khud ek unique request number bhejta hai, taaki backend ka
+      // (buggy) auto-generation skip ho jaaye aur "Duplicate entry" error na aaye.
+      const now = new Date();
+      const p = (n) => String(n).padStart(2, '0');
+      const datePart = `${String(now.getFullYear()).slice(2)}${p(now.getMonth() + 1)}${p(now.getDate())}`;
+      const timePart = `${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
+      const rand = String(Math.floor(Math.random() * 900) + 100);
+      const request_no = `SR-${datePart}-${timePart}${rand}`;
+
+      const fields = { request_no, user: user.id, service: service.id, quantity: qty, address: address.trim(), notes: notes.trim() };
       let created;
       if (image) {
         created = await serviceApi.serviceRequests.create(buildFormData(fields, { image }), MULTIPART);
       } else {
         created = await serviceApi.serviceRequests.create(fields);
       }
-      navigation.replace('ApplicationSuccess', { request: created, service });
+      // Paid service -> Razorpay (live). Free service -> straight to success.
+      if (Number(service?.price || 0) > 0) {
+        setCreatedReq(created);
+        setPayOpen(true);
+      } else {
+        navigation.replace('ApplicationSuccess', { request: created, service });
+      }
     } catch (err) {
       Alert.alert('Could not submit', friendlyError(err));
     } finally {
@@ -59,8 +77,18 @@ export default function ServiceApplicationScreen({ route, navigation }) {
     }
   };
 
+  const onPayClosed = async (finished) => {
+    setPayOpen(false);
+    let req = createdReq;
+    // PaymentModal already confirmed with the server; always re-read the booking.
+    if (createdReq?.id) {
+      try { req = await serviceApi.serviceRequests.get(createdReq.id); } catch { /* keep */ }
+    }
+    navigation.replace('ApplicationSuccess', { request: req, service });
+  };
+
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Apply for service" onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
@@ -93,10 +121,18 @@ export default function ServiceApplicationScreen({ route, navigation }) {
             <Text style={styles.totalValue}>{currency(total)}</Text>
           </View>
 
-          <Button title="Submit application" onPress={submit} loading={busy} style={{ marginTop: spacing.lg }} />
+          <Button title={total > 0 ? `Proceed to Pay ${currency(total)}` : 'Submit application'} onPress={submit} loading={busy} style={{ marginTop: spacing.lg }} />
           <View style={{ height: spacing.xxl }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <PaymentModal
+        visible={payOpen}
+        kind="service"
+        refId={createdReq?.id}
+        url={createdReq?.id ? paymentUrl('service', createdReq.id) : null}
+        onClose={onPayClosed}
+      />
     </Screen>
   );
 }

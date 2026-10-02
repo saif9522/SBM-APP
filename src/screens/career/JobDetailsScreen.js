@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen, Header, Button, Card } from '../../components';
 import { colors, spacing, typography } from '../../constants/theme';
+import { fees as fetchFees, feeText, feeRequired } from '../../api/paymentApi';
 
 export default function JobDetailsScreen({ route, navigation }) {
   const { position } = route.params || {};
+  const insets = useSafeAreaInsets();
+  const [fee, setFee] = useState(null);
+  useEffect(() => { fetchFees().then((d) => setFee(d?.career ?? null)).catch(() => {}); }, []);
+  const feeLabel = feeText(fee);
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Position" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={styles.title}>{position?.label}</Text>
@@ -22,13 +28,14 @@ export default function JobDetailsScreen({ route, navigation }) {
         </Card>
         <Card style={styles.card}>
           <Text style={styles.sectionTitle}>What you'll need</Text>
-          {['Resume / CV', 'Aadhaar document', 'Basic details & qualification'].map((t) => (
+          {['Resume / CV', 'Aadhaar document', 'Basic details & qualification',
+            ...(feeRequired(fee) ? [`One-time joining fee${feeLabel ? ` ${feeLabel}` : ''} (UPI / card via Razorpay)`] : [])].map((t) => (
             <View key={t} style={styles.li}><Ionicons name="checkmark-circle" size={16} color={colors.primary} /><Text style={styles.liText}>{t}</Text></View>
           ))}
         </Card>
       </ScrollView>
-      <View style={styles.footer}>
-        <Button title="Apply now" onPress={() => navigation.navigate('ApplyJob', { position })} />
+      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
+        <Button title={feeLabel ? `Apply now · Fee ${feeLabel}` : 'Apply now'} onPress={() => navigation.navigate('ApplyJob', { position })} />
       </View>
     </Screen>
   );

@@ -1,9 +1,15 @@
 import { createResource } from './resource';
 import { API } from '../constants/endpoints';
+import listMine from './mine';
 
 export const applications = createResource(API.jobApplications);
-export function myApplications(userId, params = {}) {
-  return applications.list({ user: userId, ...params });
+/** Sirf logged-in user ki job applications. */
+export function myApplications(user, params = {}) {
+  return listMine(applications, user, {
+    params: { ordering: '-created_at', ...params },
+    userParam: 'user',
+    phoneParam: 'phone',
+  });
 }
 export default { applications, myApplications };
 

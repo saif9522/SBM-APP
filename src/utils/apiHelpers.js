@@ -34,18 +34,25 @@ export function friendlyError(error) {
   }
   const status = error?.response?.status;
   const data = error?.response?.data;
+
+  // 404 ya HTML error page (jaise "Page not found") ka raw HTML mat dikhao.
+  const isHtml = typeof data === 'string' && /<\/?html|<!doctype|page not found|padding:/i.test(data);
+  if (status === 404 || isHtml) {
+    return 'This service is not available on the server yet.';
+  }
+
   if (data) {
     if (typeof data === 'string') return truncate(stripHtml(data));
     if (data.detail) return String(data.detail);
     if (data.message) return String(data.message);
-    // DRF field errors -> first message
+    // DRF field errors -> first message (bina "field:" prefix ke, saaf message)
     const firstKey = Object.keys(data)[0];
     if (firstKey) {
       const val = data[firstKey];
-      return `${firstKey}: ${Array.isArray(val) ? val[0] : val}`;
+      return String(Array.isArray(val) ? val[0] : val);
     }
   }
-  if (status === 401) return 'Your session has expired. Please sign in again.';
+  if (status === 401) return 'Incorrect credentials. Please try again.';
   if (status === 403) return 'You do not have permission to do that.';
   if (status === 404) return 'Not found.';
   if (status >= 500) return 'The server had a problem. Please try again shortly.';

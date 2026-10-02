@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen, Header, Card, Button } from '../../components';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { formatDate } from '../../utils/format';
@@ -16,6 +17,7 @@ function Row({ label, value }) {
 }
 
 export default function DonorDetailsScreen({ route, navigation }) {
+  const insets = useSafeAreaInsets();
   const { donor } = route.params || {};
   const call = () => {
     if (!donor?.phone) return;
@@ -24,7 +26,7 @@ export default function DonorDetailsScreen({ route, navigation }) {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Donor details" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.head}>
@@ -42,7 +44,7 @@ export default function DonorDetailsScreen({ route, navigation }) {
 
         <View style={{ flex: 1 }} />
       </ScrollView>
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button title="Call donor" icon={<Ionicons name="call" size={18} color="#fff" />} onPress={call} disabled={!donor?.phone} />
       </View>
     </Screen>

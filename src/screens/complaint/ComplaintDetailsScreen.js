@@ -19,7 +19,7 @@ export default function ComplaintDetailsScreen({ route, navigation }) {
   const currentIndex = STEPS.findIndex((s) => s.key === c?.status);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header title="Complaint details" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.head}>

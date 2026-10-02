@@ -10,12 +10,12 @@ import { currency, formatDate } from '../../utils/format';
 export default function BookingsScreen({ navigation }) {
   const { user } = useAuth();
   const { data, loading, error, refetch } = useApi(
-    () => serviceApi.myRequests(user?.id, { ordering: '-created_at' }),
-    [user?.id]
+    () => serviceApi.myRequests(user, { ordering: '-created_at' }),
+    [user?.id, user?.phone]
   );
 
   return (
-    <Screen edges={['top', 'bottom']}>
+    <Screen edges={['bottom']}>
       <Header title="My Bookings" />
       {loading && !data ? (
         <Loader message="Loading bookings…" />

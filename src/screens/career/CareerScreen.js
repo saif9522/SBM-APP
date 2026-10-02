@@ -7,7 +7,7 @@ import { POSITIONS } from '../../api/careerApi';
 
 export default function CareerScreen({ navigation }) {
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <Header
         title="Careers"
         onBack={() => navigation.goBack()}
@@ -31,7 +31,7 @@ export default function CareerScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  myLink: { color: colors.primary, fontWeight: typography.semibold, fontSize: typography.small },
+  myLink: { color: "#fff", fontWeight: typography.semibold, fontSize: typography.small },
   list: { padding: spacing.lg },
   intro: { fontSize: typography.small, color: colors.textMuted, marginBottom: spacing.md, lineHeight: 19 },
   card: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
