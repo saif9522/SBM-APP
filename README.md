@@ -165,3 +165,4 @@ final artwork before publishing: `icon.png` (1024x1024), `adaptive-icon.png`
 - Metro cache issues -> `npx expo start -c`
 - SecureStore errors on web -> SecureStore is native-only; use a device/emulator
 - Requests fail on device -> confirm `API_BASE_URL` is reachable over HTTPS
+# SBM-APP
